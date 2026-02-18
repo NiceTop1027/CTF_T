@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTF 실시간 보드</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light-border.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="brand-group">
+          <span class="brand-mark">CTF</span>
+          <div class="brand-text">
+            <strong>Live Console</strong>
+            <span>실시간 이벤트 인텔리전스</span>
+          </div>
+        </div>
+        <span class="brand-sub">Powered by CTFtime API</span>
+      </div>
+    </div>
+
+    <div class="container">
+      <header class="page-header">
+        <h1>CTF 실시간 대시보드</h1>
+        <p>복잡한 요소를 줄이고 핵심 데이터만 빠르게 확인할 수 있도록 정리했습니다.</p>
+        <div class="meta-area">
+          <div class="meta-line">
+            <span id="metaSource">소스: -</span>
+            <span id="metaUpdated">업데이트: -</span>
+            <span id="liveState" class="live-state live">실시간 연결</span>
+          </div>
+          <div class="meta-stats">
+            <span class="stat-chip">전체 <strong id="statTotal">0</strong></span>
+            <span class="stat-chip">진행중 <strong id="statLive">0</strong></span>
+            <span class="stat-chip">예정 <strong id="statUpcoming">0</strong></span>
+            <span class="stat-chip">오프라인 <strong id="statOnsite">0</strong></span>
+            <span class="stat-chip">국내관련 <strong id="statKorea">0</strong></span>
+          </div>
+        </div>
+      </header>
+
+      <section class="layout">
+        <div class="left-column">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>팀 평점</h2>
+            </div>
+
+            <h3>한국 상위 팀</h3>
+            <table class="data-table compact">
+              <thead>
+                <tr>
+                  <th>순위</th>
+                  <th>팀</th>
+                  <th>점수</th>
+                </tr>
+              </thead>
+              <tbody id="rankKr"></tbody>
+            </table>
+
+            <h3>글로벌 상위 팀</h3>
+            <table class="data-table compact">
+              <thead>
+                <tr>
+                  <th>순위</th>
+                  <th>팀</th>
+                  <th>점수</th>
+                </tr>
+              </thead>
+              <tbody id="rankGlobal"></tbody>
+            </table>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>다가오는 행사</h2>
+              <span id="upcomingCount">0개</span>
+            </div>
+            <table class="data-table compact">
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>시작</th>
+                  <th>지속</th>
+                </tr>
+              </thead>
+              <tbody id="upcomingList"></tbody>
+            </table>
+          </section>
+        </div>
+
+        <main class="right-column panel">
+          <div class="panel-head">
+            <h2>행사 목록</h2>
+            <span id="eventCount">0개</span>
+          </div>
+
+          <section class="toolbar">
+            <div class="filters">
+              <button class="filter active" data-view="all">전체</button>
+              <button class="filter" data-view="live">진행중</button>
+              <button class="filter" data-view="upcoming">예정</button>
+              <button class="filter" data-view="korea">국내 관련</button>
+              <button class="filter" data-view="pinned">즐겨찾기</button>
+            </div>
+            <div class="toolbar-right">
+              <button class="sort-btn active" data-sort="start" data-label="시작순">시작순</button>
+              <button class="sort-btn" data-sort="participants" data-label="참가자순">참가자순</button>
+              <button class="sort-btn" data-sort="status" data-label="상태순">상태순</button>
+              <input id="searchInput" type="search" placeholder="이벤트 검색" />
+              <button id="clearSearch" class="util-btn" type="button">검색 초기화</button>
+              <button id="densityToggle" class="util-btn" type="button">컴팩트 보기</button>
+              <button id="streamToggle" class="util-btn" type="button">실시간 일시정지</button>
+            </div>
+          </section>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>상태</th>
+                <th>대회</th>
+                <th>시작</th>
+                <th>종료</th>
+                <th>참가팀</th>
+                <th>형식</th>
+                <th>링크</th>
+              </tr>
+            </thead>
+            <tbody id="eventList"></tbody>
+          </table>
+        </main>
+      </section>
+    </div>
+
+    <template id="eventTemplate">
+      <tr class="event-row">
+        <td class="status-cell"></td>
+        <td class="title-cell"></td>
+        <td class="start-cell"></td>
+        <td class="finish-cell"></td>
+        <td class="participants-cell"></td>
+        <td class="type-cell"></td>
+        <td class="links-cell"></td>
+      </tr>
+    </template>
+
+    <template id="rankTemplate">
+      <tr>
+        <td class="rank-cell"></td>
+        <td class="team-cell"></td>
+        <td class="points-cell"></td>
+      </tr>
+    </template>
+
+    <template id="upcomingTemplate">
+      <tr>
+        <td class="upcoming-name"></td>
+        <td class="upcoming-start"></td>
+        <td class="upcoming-duration"></td>
+      </tr>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

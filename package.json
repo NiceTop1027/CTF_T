@@ -1,0 +1,12 @@
+{
+  "name": "ctf-live-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Realtime CTF dashboard with API-key based upstream integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js"
+  }
+}
